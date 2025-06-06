@@ -12,7 +12,7 @@ Cat Jump é um jogo 2D feito em C++ usando a biblioteca [raylib](https://www.ray
   - **2** para sair do jogo.
 
 ## Requisitos
-
+- w64devkit-1.20.0
 - Biblioteca raylib instalada.
 - Arquivos de música: `menu.mp3` e `level.mp3` na pasta do jogo.
 - Imagens: `bg.jpg` (background) e `gato.png` (personagem).
