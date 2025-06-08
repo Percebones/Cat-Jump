@@ -23,7 +23,3 @@ Compile usando MAKE: make run
 
 Criando o .exe usando MAKE: make config=release
 
-
-
-```bash
-gcc -o catjump main.c -lraylib -lm -lpthread -ldl -lrt -lX11
