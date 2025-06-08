@@ -18,7 +18,8 @@ Cat Jump é um jogo 2D feito em C++ usando a biblioteca [raylib](https://www.ray
 ## Como compilar
 
 Compile usando MAKE: make run
-make config=release(cria a pasta com o .exe)
+Criando o .exe usando MAKE: make config=release
+
 
 
 ```bash
