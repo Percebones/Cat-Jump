@@ -1,6 +1,7 @@
 # Cat-Jump
 
 Cat Jump é um jogo 2D feito em C++ usando a biblioteca [raylib](https://www.raylib.com/). Controle o gato para pular e se movimentar enquanto o tempo passa. 
+![Uploading 7ea3c2bd-5a27-4a47-bbd5-e4f930e1d156.jpg…]()
 
 ## Como jogar
 
