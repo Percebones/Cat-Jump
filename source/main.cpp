@@ -27,14 +27,15 @@ typedef struct
 #define MAX_OBSTACULOS 10
 #define MAX_POMBOS 5
 
-int main()
+int main(void)
 {
-    // Inicia o janela e configura o seu tamanho de acordo com a resolucao do monitor e deixa em full screen
-    InitWindow(800, 600, "Cat Jump");
+
+    //Inicia o janela e configura o seu tamanho de acordo com a resolucao do monitor e deixa em full screen
+    InitWindow(600, 600, "Cat Jump");
     int larguraTela = GetMonitorWidth(0);
     int alturaTela = GetMonitorHeight(0);
-    SetWindowSize(larguraTela, alturaTela);
     SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE);
+    SetWindowSize(larguraTela, alturaTela);
     SetTargetFPS(165);
 
     // Seta o Icone da janela
@@ -48,19 +49,29 @@ int main()
     Music menuMusica = LoadMusicStream(FIND_ASSET("./musicas/menu.mp3")), levelMusica = LoadMusicStream(FIND_ASSET("./musicas/level.mp3"));
     // Toca a musica do menu
     PlayMusicStream(menuMusica);
-
+    // Carrega a logo
     Texture2D logo = LoadTexture(FIND_ASSET("./imagens/Logo.png"));
+
+    // Carrega o plano de fundo do jogo e redimensiona para o monitor
     Image bgImage = LoadImage(FIND_ASSET("./imagens/bg.png"));
     ImageResize(&bgImage, larguraTela, alturaTela);
     Texture2D bg = LoadTextureFromImage(bgImage);
-    Texture2D gato = LoadTexture(FIND_ASSET("./imagens/gato.png"));
 
+    Image player = LoadImage(FIND_ASSET("./imagens/gato.png"));
+    int tamanhoGato = larguraTela / 6;
+    ImageResize(&player, tamanhoGato, tamanhoGato);
+    Texture2D gato = LoadTextureFromImage(player);
+
+    // Carrega imagem da bola de neve e redimensiona de acordo com a resolucao
     Image obstaculo = LoadImage(FIND_ASSET("./imagens/obstaculo.png"));
-    ImageResize(&obstaculo, 100, 100);
+    int tamanhoObstaculo = larguraTela / 26;
+    ImageResize(&obstaculo, tamanhoObstaculo, tamanhoObstaculo);
     Texture2D obstaculoImg = LoadTextureFromImage(obstaculo);
 
+    // Carrega imagem do pombo e redimensiona de acordo com a resolucao
     Image pombo = LoadImage(FIND_ASSET("./imagens/pombo.png"));
-    ImageResize(&pombo, 200, 200);
+    int tamanhoPombo = larguraTela / 15;
+    ImageResize(&pombo, tamanhoPombo, tamanhoPombo);
     Texture2D pomboImg = LoadTextureFromImage(pombo);
 
     // Variaveis e ponteiros usados pelo jogo e seus menus
@@ -73,14 +84,16 @@ int main()
     *pVida = 100;
     char tempo[64];
 
-
     double inicioJogo;
 
     Obstaculo obstaculos[MAX_OBSTACULOS] = {0};
     Pombo pombos[MAX_POMBOS] = {0};
 
+    // Inicio do Loop
     while (!WindowShouldClose() && !sair)
     {
+        larguraTela = GetScreenWidth();
+        alturaTela = GetScreenHeight();
         // Funcoes do Raylib que prepara as musicas pra usadas
         UpdateMusicStream(menuMusica);
         UpdateMusicStream(levelMusica);
@@ -90,8 +103,6 @@ int main()
         sprintf(textoVida, "Vida: %d", *pVida);
         char textoPontos[3];
         sprintf(textoPontos, "Pontos: %d", *pPontos);
-
-
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -103,15 +114,37 @@ int main()
             // Desenha o plano de fundo
             DrawTexture(bg, 0, 0, RAYWHITE);
 
-            // Desenha a logo do jogo na tela
-            DrawTexture(logo, larguraTela / 2.5, alturaTela / 3 - logo.height, RAYWHITE);
+            // Defina a largura e altura do menu
+            float menuWidth = 310;
+            float menuHeight = 150;
 
-            // Tudo isso e o menu sendo desenhado na tela
-            DrawRectangle(larguraTela / 2.5 + 90, alturaTela / 2 - 190, 310, 150, ColorAlpha(WHITE, 0.7f));
-            DrawRectangleLines(larguraTela / 2.5 + 90, alturaTela / 2 - 190, 310, 150, BLACK);
-            DrawText("Menu Principal", larguraTela / 2.5 + 100, alturaTela / 2 - 180, 40, BLACK);
-            DrawText("1 - Jogar", larguraTela / 2.5 + 100, alturaTela / 2 - 130, 30, BLACK);
-            DrawText("2 - Sair", larguraTela / 2.5 + 100, alturaTela / 2 - 90, 30, BLACK);
+            // Defina a posição do menu (caixa do menu)
+            Rectangle menuBox;
+            menuBox.width = menuWidth;
+            menuBox.height = menuHeight;
+
+            // Centraliza o menu na tela (embaixo da logo)
+            menuBox.x = larguraTela / 2.0f - menuBox.width / 2.0f;
+            menuBox.y = alturaTela / 2.0f; // posição do menu na vertical
+
+            // Posição da logo: centralizada horizontalmente com o menu, mas acima dele
+            // Define a posição da logo
+            float logoX = (larguraTela - logo.width) / 2.0f; // centralizada horizontalmente
+            float logoY = 20;                                // um pequeno espaço do topo
+
+            // Define a posição do menu, sempre abaixo da logo
+            float menuBoxX = (larguraTela - 310) / 2.0f; // centralizar menu horizontalmente (largura 310)
+            float menuBoxY = logoY + logo.height + 20;   // 20 px abaixo da logo
+
+            // Desenhar a logo
+            DrawTexture(logo, logoX, logoY, RAYWHITE);
+
+            // Desenhar o menu usando menuBoxX, menuBoxY
+            DrawRectangle(menuBoxX, menuBoxY, 310, 150, ColorAlpha(WHITE, 0.7f));
+            DrawRectangleLines(menuBoxX, menuBoxY, 310, 150, BLACK);
+            DrawText("Menu Principal", menuBoxX + 10, menuBoxY + 10, 40, BLACK);
+            DrawText("1 - Jogar", menuBoxX + 10, menuBoxY + 60, 30, BLACK);
+            DrawText("2 - Sair", menuBoxX + 10, menuBoxY + 100, 30, BLACK);
 
             // Condicao que entra no jogo(muda a tela para o jogo, para a musica do menu e inicia a do jogo)
             if (IsKeyPressed(KEY_ONE))
@@ -146,6 +179,7 @@ int main()
             // Verifica se a tecla de pulo esta pressionada e inicia o pulo
             if (!pulando && IsKeyPressed(KEY_SPACE))
             {
+
                 velY = -40;
                 pulando = 1;
             }
@@ -165,11 +199,16 @@ int main()
             // Desenha a imagem de fundo do jogo
             DrawTexture(bg, 0, 0, RAYWHITE);
             // Desenha as informcoes que aparecem na tela
-            DrawText("Use WASD para mover o gato", 50, 50, 40, BLACK);
-            DrawText(textoVida, 50, 100, 40, BLACK);
-            DrawText(tempo, 50, 150, 40, BLACK);
-            DrawText(textoPontos, 50, 200, 40, BLACK);
-            DrawText("Pressione BACKSPACE para voltar", 50, 250, 30, BLACK);
+            // Define o retângulo para o bloco no canto superior esquerdo com margem
+            Rectangle infoBox;
+            infoBox.x = 10;
+            infoBox.y = 10;
+            DrawText("Use WASD para mover o gato", (int)infoBox.x + 10, (int)infoBox.y + 10, 40, BLACK);
+            DrawText(textoVida, (int)infoBox.x + 10, (int)infoBox.y + 60, 40, BLACK);
+            DrawText(tempo, (int)infoBox.x + 10, (int)infoBox.y + 110, 40, BLACK);
+            DrawText(textoPontos, (int)infoBox.x + 10, (int)infoBox.y + 160, 40, BLACK);
+            DrawText("Pressione BACKSPACE para voltar", (int)infoBox.x + 10, (int)infoBox.y + 210, 30, BLACK);
+
             // Desenha o gato
             DrawTexture(gato, (int)posx, (int)posy, WHITE);
 
@@ -271,19 +310,32 @@ int main()
                 telaAtual = 0;
             break;
         }
-        //Condicao que vai para o menu de Fim de Jogo
+            // Condicao que vai para o menu de Fim de Jogo
         case 3:
         {
             DrawTexture(bg, 0, 0, RAYWHITE);
-            DrawText("Fim de Jogo", larguraTela / 2.5 + 70, alturaTela / 2 - 250, 60, BLACK);
-            DrawRectangle(larguraTela / 2.5 + 90, alturaTela / 2 - 190, 310, 150, ColorAlpha(WHITE, 0.7f));
-            DrawRectangleLines(larguraTela / 2.5 + 90, alturaTela / 2 - 190, 310, 150, BLACK);
+
+            // Define um "caixa" para o conteúdo do menu
+            Rectangle fimBox;
+            fimBox.x = larguraTela / 2.5f + 90;
+            fimBox.y = alturaTela / 2 - 190;
+            fimBox.width = 310;
+            fimBox.height = 150;
+
+            // Texto título acima da caixa, centralizado em relação à caixa
+            DrawText("Fim de Jogo", (int)(fimBox.x + fimBox.width / 2 - MeasureText("Fim de Jogo", 60) / 2), (int)(fimBox.y - 70), 60, BLACK);
+
+            // Caixa de fundo semi-transparente
+            DrawRectangleRec(fimBox, ColorAlpha(WHITE, 0.7f));
+            DrawRectangleLinesEx(fimBox, 1, BLACK);
+
+            // Textos dentro da caixa com espaçamentos relativos ao fimBox
             DrawText("Pressione BACKSPACE para voltar", 50, 100, 30, BLACK);
-            DrawText(tempo, larguraTela / 2.5 + 100, alturaTela / 2 - 180, 40, BLACK);
-            DrawText(textoPontos, larguraTela / 2.5 + 100, alturaTela / 2 - 120, 40, BLACK);
+            DrawText(tempo, (int)(fimBox.x + 10), (int)(fimBox.y + 10), 40, BLACK);
+            DrawText(textoPontos, (int)(fimBox.x + 10), (int)(fimBox.y + 70), 40, BLACK);
+
             if (IsKeyPressed(KEY_BACKSPACE))
             {
-
                 *pPontos = 0;
                 *pVida = 100;
                 telaAtual = 0;
