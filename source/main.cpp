@@ -7,7 +7,8 @@
 #define STR(a) NO_EXPAND(a)
 #define FIND_ASSET(AssetPath) STR(CONTENT_PATH) AssetPath
 #define FIND_CONFIG(ConfigPath) STR(CONFIG_PATH) ConfigPath
-
+#define MAX_OBSTACULOS 10
+#define MAX_POMBOS 5
 // Estrutura para representar obstáculos
 typedef struct
 {
@@ -24,13 +25,10 @@ typedef struct
     float velocidade = 1.5;
 } Pombo;
 
-#define MAX_OBSTACULOS 10
-#define MAX_POMBOS 5
-
 int main(void)
 {
 
-    //Inicia o janela e configura o seu tamanho de acordo com a resolucao do monitor e deixa em full screen
+    // Inicia o janela e configura o seu tamanho de acordo com a resolucao do monitor e deixa em full screen
     InitWindow(600, 600, "Cat Jump");
     int larguraTela = GetMonitorWidth(0);
     int alturaTela = GetMonitorHeight(0);
@@ -47,6 +45,7 @@ int main(void)
     InitAudioDevice();
     // Carrega as musicas do menu e do jogo
     Music menuMusica = LoadMusicStream(FIND_ASSET("./musicas/menu.mp3")), levelMusica = LoadMusicStream(FIND_ASSET("./musicas/level.mp3"));
+    Sound somPausa = LoadSound(FIND_ASSET("./musicas/pausa.mp3"));
     // Toca a musica do menu
     PlayMusicStream(menuMusica);
     // Carrega a logo
@@ -83,17 +82,21 @@ int main(void)
     int *pPontos = &pontos, *pVida = &vida;
     *pVida = 100;
     char tempo[64];
-
+    bool pausa = false;
+    bool reset = false;
     double inicioJogo;
-
+    float menuBoxX;
+    float menuBoxY;
     Obstaculo obstaculos[MAX_OBSTACULOS] = {0};
     Pombo pombos[MAX_POMBOS] = {0};
 
     // Inicio do Loop
     while (!WindowShouldClose() && !sair)
     {
+
         larguraTela = GetScreenWidth();
         alturaTela = GetScreenHeight();
+
         // Funcoes do Raylib que prepara as musicas pra usadas
         UpdateMusicStream(menuMusica);
         UpdateMusicStream(levelMusica);
@@ -104,53 +107,32 @@ int main(void)
         char textoPontos[3];
         sprintf(textoPontos, "Pontos: %d", *pPontos);
 
+        if (!pausa)
+        {
+        }
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
+        if (pausa)
+        {
+            PauseMusicStream(levelMusica);
+        }
+        else
+        {
+            ResumeMusicStream(levelMusica);
+        }
 
         switch (telaAtual)
         {
         case 0:
         {
-            // Desenha o plano de fundo
-            DrawTexture(bg, 0, 0, RAYWHITE);
-
-            // Defina a largura e altura do menu
-            float menuWidth = 310;
-            float menuHeight = 150;
-
-            // Defina a posição do menu (caixa do menu)
-            Rectangle menuBox;
-            menuBox.width = menuWidth;
-            menuBox.height = menuHeight;
-
-            // Centraliza o menu na tela (embaixo da logo)
-            menuBox.x = larguraTela / 2.0f - menuBox.width / 2.0f;
-            menuBox.y = alturaTela / 2.0f; // posição do menu na vertical
-
-            // Posição da logo: centralizada horizontalmente com o menu, mas acima dele
-            // Define a posição da logo
-            float logoX = (larguraTela - logo.width) / 2.0f; // centralizada horizontalmente
-            float logoY = 20;                                // um pequeno espaço do topo
-
-            // Define a posição do menu, sempre abaixo da logo
-            float menuBoxX = (larguraTela - 310) / 2.0f; // centralizar menu horizontalmente (largura 310)
-            float menuBoxY = logoY + logo.height + 20;   // 20 px abaixo da logo
-
-            // Desenhar a logo
-            DrawTexture(logo, logoX, logoY, RAYWHITE);
-
-            // Desenhar o menu usando menuBoxX, menuBoxY
-            DrawRectangle(menuBoxX, menuBoxY, 310, 150, ColorAlpha(WHITE, 0.7f));
-            DrawRectangleLines(menuBoxX, menuBoxY, 310, 150, BLACK);
-            DrawText("Menu Principal", menuBoxX + 10, menuBoxY + 10, 40, BLACK);
-            DrawText("1 - Jogar", menuBoxX + 10, menuBoxY + 60, 30, BLACK);
-            DrawText("2 - Sair", menuBoxX + 10, menuBoxY + 100, 30, BLACK);
-
-            // Condicao que entra no jogo(muda a tela para o jogo, para a musica do menu e inicia a do jogo)
-            if (IsKeyPressed(KEY_ONE))
+            if (reset == true)
             {
+                reset = false;
+                *pVida = 100;
                 telaAtual = 1;
-                StopMusicStream(menuMusica);
+                posx = 0;
+                posy = alturaTela - gato.height;
                 PlayMusicStream(levelMusica);
                 inicioJogo = GetTime();
                 // Reset obstacles and pigeons when starting game
@@ -159,40 +141,102 @@ int main(void)
                 for (int i = 0; i < MAX_POMBOS; i++)
                     pombos[i].ativo = false;
             }
-            // Condicao que Sai do jogo
-            if (IsKeyPressed(KEY_TWO))
-                sair = true;
-            break;
+            else
+            {
+                // Desenha o plano de fundo
+                DrawTexture(bg, 0, 0, RAYWHITE);
+
+                // Defina a largura e altura do menu
+                float menuWidth = 310;
+                float menuHeight = 150;
+
+                // Defina a posição do menu (caixa do menu)
+                Rectangle menuBox;
+                menuBox.width = menuWidth;
+                menuBox.height = menuHeight;
+
+                // Centraliza o menu na tela (embaixo da logo)
+                menuBox.x = larguraTela / 2.0f - menuBox.width / 2.0f;
+                menuBox.y = alturaTela / 2.0f; // posição do menu na vertical
+
+                // Posição da logo: centralizada horizontalmente com o menu, mas acima dele
+                // Define a posição da logo
+                float logoX = (larguraTela - logo.width) / 2.0f; // centralizada horizontalmente
+                float logoY = 20;                                // um pequeno espaço do topo
+
+                // Define a posição do menu, sempre abaixo da logo
+                menuBoxX = (larguraTela - 310) / 2.0f; // centralizar menu horizontalmente (largura 310)
+                menuBoxY = logoY + logo.height + 20;   // 20 px abaixo da logo
+
+                // Desenhar a logo
+                DrawTexture(logo, logoX, logoY, RAYWHITE);
+
+                // Desenhar o menu usando menuBoxX, menuBoxY
+                DrawRectangle(menuBoxX, menuBoxY, 310, 150, ColorAlpha(WHITE, 0.7f));
+                DrawRectangleLines(menuBoxX, menuBoxY, 310, 150, BLACK);
+                DrawText("Menu Principal", menuBoxX + 10, menuBoxY + 10, 40, BLACK);
+                DrawText("1 - Jogar", menuBoxX + 10, menuBoxY + 60, 30, BLACK);
+                DrawText("2 - Sair", menuBoxX + 10, menuBoxY + 100, 30, BLACK);
+
+                // Condicao que entra no jogo(muda a tela para o jogo, para a musica do menu e inicia a do jogo)
+                if (IsKeyPressed(KEY_ONE))
+                {
+                    telaAtual = 1;
+                    StopMusicStream(menuMusica);
+                    PlayMusicStream(levelMusica);
+                    inicioJogo = GetTime();
+                    // Reset obstacles and pigeons when starting game
+                    for (int i = 0; i < MAX_OBSTACULOS; i++)
+                        obstaculos[i].ativo = false;
+                    for (int i = 0; i < MAX_POMBOS; i++)
+                        pombos[i].ativo = false;
+                }
+                // Condicao que Sai do jogo
+                if (IsKeyPressed(KEY_TWO))
+                    sair = true;
+                break;
+            }
         }
         case 1:
         {
-            // Configuracao para exibir o timer na tela corretamente
-            double tempoAtual = GetTime() - inicioJogo;
-            sprintf(tempo, "Tempo: %.0fs", tempoAtual);
-
-            // Condicoes que fazem o gato ir para a esquerda(Aumentando o ou diminuindo o posx do gato)
-            if (IsKeyDown(KEY_D) && posx < larguraTela - gato.width)
-                posx += velocidade;
-            if (IsKeyDown(KEY_A) && posx > 0)
-                posx -= velocidade;
-
-            // Verifica se a tecla de pulo esta pressionada e inicia o pulo
-            if (!pulando && IsKeyPressed(KEY_SPACE))
+            // Pausa o jogo e a musica
+            if (IsKeyPressed(KEY_P))
             {
-
-                velY = -40;
-                pulando = 1;
+                PlaySound(somPausa);
+                pausa = !pausa;
             }
-            // Faz o gato voltar para o chao
-            if (pulando)
+
+            // Se o jogo nao estiver pausado roda a logica
+            if (!pausa)
             {
-                velY += gravity;
-                posy += velY;
-                if (posy >= alturaTela - gato.height)
+                // Configuracao para exibir o timer na tela corretamente
+                double tempoAtual = GetTime() - inicioJogo;
+                sprintf(tempo, "Tempo: %.0fs", tempoAtual);
+
+                // Condicoes que fazem o gato ir para a esquerda(Aumentando o ou diminuindo o posx do gato)
+                if (IsKeyDown(KEY_D) && posx < larguraTela - gato.width)
+                    posx += velocidade;
+                if (IsKeyDown(KEY_A) && posx > 0)
+                    posx -= velocidade;
+
+                // Verifica se a tecla de pulo esta pressionada e inicia o pulo
+                if (!pulando && IsKeyPressed(KEY_SPACE))
                 {
-                    posy = alturaTela - gato.height;
-                    velY = 0;
-                    pulando = 0;
+
+                    velY = -40;
+                    pulando = 1;
+                }
+                // Faz o gato voltar para o chao
+                if (pulando)
+                {
+                    velY += gravity;
+                    posy += velY;
+                    if (posy >= alturaTela - gato.height)
+                    {
+                        posy = alturaTela - gato.height;
+                        velY = 0;
+                        pulando = 0;
+                    }
                 }
             }
 
@@ -212,72 +256,81 @@ int main(void)
             // Desenha o gato
             DrawTexture(gato, (int)posx, (int)posy, WHITE);
 
-            // Spawna pombos
-            for (int i = 0; i < MAX_POMBOS; i++)
+            // Desenha o pausado na tela e toca o som do pause
+            if (pausa)
             {
-                if (!pombos[i].ativo && GetRandomValue(0, 1000) < 5)
-                {
-                    pombos[i].ativo = true;
-                    pombos[i].pos.x = larguraTela;                                     // Começa à direita da tela
-                    pombos[i].pos.y = GetRandomValue(0, alturaTela - pomboImg.height); // Altura aleatória
-                    pombos[i].velocidade = GetRandomValue(2, 6);                       // Velocidade para a esquerda
-                }
-
-                if (pombos[i].ativo)
-                {
-                    pombos[i].pos.x -= pombos[i].velocidade; // Move para a esquerda
-
-                    DrawTexture(pomboImg, pombos[i].pos.x, pombos[i].pos.y, WHITE);
-
-                    Rectangle gatoRec = {posx, posy, (float)gato.width, (float)gato.height};
-                    Rectangle pomboRec = {pombos[i].pos.x, pombos[i].pos.y, (float)pomboImg.width, (float)pomboImg.height};
-
-                    if (CheckCollisionRecs(gatoRec, pomboRec))
-                    {
-                        *pPontos += 1;
-                        *pVida += 10;
-                        if (*pVida > 100)
-                            *pVida = 100;
-                        pombos[i].ativo = false;
-                    }
-
-                    if (pombos[i].pos.x + pomboImg.width < 0)
-                    {
-                        pombos[i].ativo = false; // Saiu da tela pela esquerda
-                    }
-                }
+                DrawText("PAUSADO", menuBoxX - 50, 0, 100, RED);
             }
 
-            // Spawna obstáculos aleatoriamente
-            for (int i = 0; i < MAX_OBSTACULOS; i++)
+            if (!pausa)
             {
-                if (!obstaculos[i].ativo && GetRandomValue(0, 1000) < 10)
+                // Spawna pombos
+                for (int i = 0; i < MAX_POMBOS; i++)
                 {
-                    obstaculos[i].ativo = true;
-                    obstaculos[i].pos.x = GetRandomValue(0, larguraTela - obstaculoImg.width);
-                    obstaculos[i].pos.y = -obstaculoImg.height;
-                    obstaculos[i].velocidade = GetRandomValue(4, 10);
-                }
-
-                if (obstaculos[i].ativo)
-                {
-                    obstaculos[i].pos.y += obstaculos[i].velocidade;
-
-                    DrawTexture(obstaculoImg, obstaculos[i].pos.x, obstaculos[i].pos.y, WHITE);
-
-                    // Colisão com o gato
-                    Rectangle gatoRec = {posx, posy, (float)gato.width, (float)gato.height};
-                    Rectangle obstRec = {obstaculos[i].pos.x, obstaculos[i].pos.y, (float)obstaculoImg.width, (float)obstaculoImg.height};
-
-                    if (CheckCollisionRecs(gatoRec, obstRec))
+                    if (!pombos[i].ativo && GetRandomValue(0, 1000) < 5)
                     {
-                        *pVida -= 10;
-                        obstaculos[i].ativo = false;
+                        pombos[i].ativo = true;
+                        pombos[i].pos.x = larguraTela;                                     // Começa à direita da tela
+                        pombos[i].pos.y = GetRandomValue(0, alturaTela - pomboImg.height); // Altura aleatória
+                        pombos[i].velocidade = GetRandomValue(2, 6);                       // Velocidade para a esquerda
                     }
 
-                    if (obstaculos[i].pos.y > alturaTela)
+                    if (pombos[i].ativo)
                     {
-                        obstaculos[i].ativo = false;
+                        pombos[i].pos.x -= pombos[i].velocidade; // Move para a esquerda
+
+                        DrawTexture(pomboImg, pombos[i].pos.x, pombos[i].pos.y, WHITE);
+
+                        Rectangle gatoRec = {posx, posy, (float)gato.width, (float)gato.height};
+                        Rectangle pomboRec = {pombos[i].pos.x, pombos[i].pos.y, (float)pomboImg.width, (float)pomboImg.height};
+
+                        if (CheckCollisionRecs(gatoRec, pomboRec))
+                        {
+                            *pPontos += 1;
+                            *pVida += 10;
+                            if (*pVida > 100)
+                                *pVida = 100;
+                            pombos[i].ativo = false;
+                        }
+
+                        if (pombos[i].pos.x + pomboImg.width < 0)
+                        {
+                            pombos[i].ativo = false; // Saiu da tela pela esquerda
+                        }
+                    }
+                }
+
+                // Spawna obstáculos aleatoriamente
+                for (int i = 0; i < MAX_OBSTACULOS; i++)
+                {
+                    if (!obstaculos[i].ativo && GetRandomValue(0, 1000) < 10)
+                    {
+                        obstaculos[i].ativo = true;
+                        obstaculos[i].pos.x = GetRandomValue(0, larguraTela - obstaculoImg.width);
+                        obstaculos[i].pos.y = -obstaculoImg.height;
+                        obstaculos[i].velocidade = GetRandomValue(4, 10);
+                    }
+
+                    if (obstaculos[i].ativo)
+                    {
+                        obstaculos[i].pos.y += obstaculos[i].velocidade;
+
+                        DrawTexture(obstaculoImg, obstaculos[i].pos.x, obstaculos[i].pos.y, WHITE);
+
+                        // Colisão com o gato
+                        Rectangle gatoRec = {posx, posy, (float)gato.width, (float)gato.height};
+                        Rectangle obstRec = {obstaculos[i].pos.x, obstaculos[i].pos.y, (float)obstaculoImg.width, (float)obstaculoImg.height};
+
+                        if (CheckCollisionRecs(gatoRec, obstRec))
+                        {
+                            *pVida -= 10;
+                            obstaculos[i].ativo = false;
+                        }
+
+                        if (obstaculos[i].pos.y > alturaTela)
+                        {
+                            obstaculos[i].ativo = false;
+                        }
                     }
                 }
             }
@@ -285,7 +338,6 @@ int main(void)
             // Condicao para quando a vida do gato chegar a 0 ele morre(ira prar a musica do menu e startar a musica do jogo)
             if (*pVida < 1)
             {
-                DrawText("Gato Morreu de fome", 100, 50, 40, BLACK);
                 StopMusicStream(levelMusica);
                 PlayMusicStream(menuMusica);
                 telaAtual = 3;
@@ -300,6 +352,16 @@ int main(void)
                 telaAtual = 0;
                 break;
             }
+
+            // Reinicia o jogo
+            if (IsKeyPressed(KEY_R))
+            {
+                reset = true;
+                StopMusicStream(levelMusica);
+                telaAtual = 0;
+                break;
+            }
+
             break;
         }
         // Condicao que volta para o menu
