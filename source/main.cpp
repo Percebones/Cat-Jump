@@ -130,6 +130,7 @@ int main(void)
             {
                 reset = false;
                 *pVida = 100;
+                *pPontos = 0;
                 telaAtual = 1;
                 posx = 0;
                 posy = alturaTela - gato.height;
@@ -199,6 +200,7 @@ int main(void)
         }
         case 1:
         {
+            *pPontos = 0;
             // Pausa o jogo e a musica
             if (IsKeyPressed(KEY_P))
             {
