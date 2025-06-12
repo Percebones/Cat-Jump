@@ -77,7 +77,7 @@ int main(void)
     // posx e posy sao as posicoes do gato na tela e velocidade e a velocidade com que o gato anda
     // velY seria a velocidade com que o gato sobe e desce
     // pontos e seu ponteiro ainda nao tem usos
-    float posx = 0, posy = alturaTela - gato.height, velY = 0, gravity = 1, velocidade = 8.0f;
+    float posx = 0 , posy = alturaTela - gato.height, velY = 0, gravity = 1, velocidade = 8.0f;
     int pulando = 0, telaAtual = 0, sair = false, pontos, vida;
     int *pPontos = &pontos, *pVida = &vida;
     *pVida = 100;
@@ -200,7 +200,6 @@ int main(void)
         }
         case 1:
         {
-            *pPontos = 0;
             // Pausa o jogo e a musica
             if (IsKeyPressed(KEY_P))
             {
@@ -225,7 +224,7 @@ int main(void)
                 if (!pulando && IsKeyPressed(KEY_SPACE))
                 {
 
-                    velY = -40;
+                    velY = -32;
                     pulando = 1;
                 }
                 // Faz o gato voltar para o chao
@@ -359,6 +358,7 @@ int main(void)
             if (IsKeyPressed(KEY_R))
             {
                 reset = true;
+                pausa = false;
                 StopMusicStream(levelMusica);
                 telaAtual = 0;
                 break;
@@ -394,7 +394,7 @@ int main(void)
             DrawRectangleLinesEx(fimBox, 1, BLACK);
 
             // Textos dentro da caixa com espaçamentos relativos ao fimBox
-            DrawText("Pressione BACKSPACE para voltar", 50, 100, 30, BLACK);
+            DrawText("Pressione BACKSPACE para voltar",larguraTela/2 - MeasureText("Pressione BACKSPACE para voltar",30)/2,30,30, BLACK);
             DrawText(tempo, (int)(fimBox.x + 10), (int)(fimBox.y + 10), 40, BLACK);
             DrawText(textoPontos, (int)(fimBox.x + 10), (int)(fimBox.y + 70), 40, BLACK);
 
@@ -427,4 +427,9 @@ int main(void)
     CloseWindow();
 
     return 0;
+}
+
+
+void reiniciaJogo(){
+    
 }
