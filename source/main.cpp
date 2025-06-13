@@ -73,7 +73,7 @@ int carregarPontuacao()
 
 // Funcao que reinicia o jogo
 void reiniciarJogo(
-    bool *reset, int *pVida, int *pPontos, int *telaAtual,
+    bool *reset,bool *novoMelhor ,int *pVida, int *pPontos, int *telaAtual,
     float *posicaoGatoX, float *posicaoGatoY, int alturaTela, int gatoAltura,
     Music levelMusica, Music menuMusica, double *inicioJogo,
     OBSTACULO obstaculos[], POMBO pombos[]);
@@ -190,7 +190,7 @@ int main(void)
             {
                 // Chamando funcao que reinicia o jogo
                 reiniciarJogo(
-                    &reset, pVida, pPontos, &telaAtual,
+                    &reset,&novoMelhor, pVida, pPontos, &telaAtual,
                     &posicaoGatoX, &posicaoGatoY, alturaTela, gato.height,
                     levelMusica, menuMusica, &inicioJogo,
                     obstaculos, pombos);
@@ -482,10 +482,10 @@ int main(void)
             if (novoMelhor)
             {
                 DrawText("Nova Melhor Pontuação",
-                     rec.x + (rec.width - MeasureText("Nova Melhor Pontuação", 40)) / 2,
-                     rec.y + rec.height / 2 + 100, // centralizado verticalmente, ajusta conforme precisar
-                     40,
-                     BLACK);
+                         rec.x + (rec.width - MeasureText("Nova Melhor Pontuação", 40)) / 2,
+                         rec.y + rec.height / 2 + 100, // centralizado verticalmente, ajusta conforme precisar
+                         40,
+                         BLACK);
             }
 
             if (IsKeyPressed(KEY_BACKSPACE))
@@ -493,13 +493,14 @@ int main(void)
                 *pPontos = 0;
                 *pVida = 100;
                 telaAtual = 0;
+                novoMelhor = false;
             }
 
             if (IsKeyPressed(KEY_R))
             {
                 // Chamando funcao que reinicia o jogo
                 reiniciarJogo(
-                    &reset, pVida, pPontos, &telaAtual,
+                    &reset,&novoMelhor, pVida, pPontos, &telaAtual,
                     &posicaoGatoX, &posicaoGatoY, alturaTela, gato.height,
                     levelMusica, menuMusica, &inicioJogo,
                     obstaculos, pombos);
@@ -554,11 +555,12 @@ int main(void)
     return 0;
 }
 void reiniciarJogo(
-    bool *reset, int *pVida, int *pPontos, int *telaAtual,
+    bool *reset, bool *novoMelhor, int *pVida, int *pPontos, int *telaAtual,
     float *posicaoGatoX, float *posicaoGatoY, int alturaTela, int gatoAltura,
     Music levelMusica, Music menuMusica, double *inicioJogo,
     OBSTACULO obstaculos[], POMBO pombos[])
 {
+    *novoMelhor = false;
     *reset = false;
     *pVida = 100;
     *pPontos = 0;
