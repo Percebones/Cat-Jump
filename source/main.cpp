@@ -49,7 +49,6 @@ typedef struct
     float velocidade = 1.5;
 } POMBO;
 
-
 void salvarPontuacao(int pontos)
 {
     std::ofstream arquivo("melhorPontuacao.txt");
@@ -145,7 +144,7 @@ int main(void)
     int pulando = 0, telaAtual = 0, sair = false, pontos, vida, *pPontos = &pontos, *pVida = &vida;
     *pVida = 100, *pPontos = 0;
     char tempo[64];
-    bool pausa = false, reset = false;
+    bool pausa = false, reset = false, novoMelhor = false;
     double inicioJogo;
     float menuBoxX, menuBoxY;
     OBSTACULO obstaculos[MAX_OBSTACULOS] = {0};
@@ -448,31 +447,46 @@ int main(void)
             // Condicao que vai para o menu de Fim de Jogo
         case 3:
         {
+
+            DrawTexture(bg, 0, 0, RAYWHITE);
+            Rectangle rec; // x=100, y=100, largura=200, altura=150
+            rec.x = larguraTela / 2.5f + 90;
+            rec.y = alturaTela / 2 - 190;
+            rec.width = 450;
+            rec.height = 150;
+
+            DrawTexture(bg, 0, 0, RAYWHITE);
+            DrawRectangleRec(rec, ColorAlpha(WHITE, 0.7f));
+            DrawRectangleLinesEx(rec, 1, BLACK);
+            DrawText("Pressione BACKSPACE para voltar", larguraTela / 1.9 - MeasureText("Pressione BACKSPACE para voltar", 30) / 2, 30, 30, BLACK);
+            DrawText("Pressione R para reiniciar", larguraTela / 1.9 - MeasureText("Pressione R para reiniciar", 30) / 2, 80, 30, BLACK);
+            // Textos dentro da caixa com espaçamentos relativos ao fimBox
+            DrawText("Fim de Jogo", (int)(rec.x + rec.width / 2 - MeasureText("Fim de Jogo", 60) / 2), (int)(rec.y - 70), 60, BLACK);
+            DrawText(tempo,
+                     rec.x + (rec.width - MeasureText(tempo, 40)) / 2,
+                     rec.y + rec.height / 2 - 60, // centralizado verticalmente, ajusta conforme precisar
+                     40,
+                     BLACK); // Textos dentro da caixa com espaçamentos relativos ao fimBox
+            DrawText(textoPontos,
+                     rec.x + (rec.width - MeasureText(textoPontos, 40)) / 2,
+                     rec.y + rec.height / 2 - 10, // centralizado verticalmente, ajusta conforme precisar
+                     40,
+                     BLACK);
+
             if (*pPontos > carregarPontuacao())
             {
                 salvarPontuacao(*pPontos);
+                novoMelhor = true;
             }
-            DrawTexture(bg, 0, 0, RAYWHITE);
 
-            // Define um "caixa" para o conteúdo do menu
-            Rectangle fimBox;
-            fimBox.x = larguraTela / 2.5f + 90;
-            fimBox.y = alturaTela / 2 - 190;
-            fimBox.width = 310;
-            fimBox.height = 150;
-
-            // Texto título acima da caixa, centralizado em relação à caixa
-            DrawText("Fim de Jogo", (int)(fimBox.x + fimBox.width / 2 - MeasureText("Fim de Jogo", 60) / 2), (int)(fimBox.y - 70), 60, BLACK);
-
-            // Caixa de fundo semi-transparente
-            DrawRectangleRec(fimBox, ColorAlpha(WHITE, 0.7f));
-            DrawRectangleLinesEx(fimBox, 1, BLACK);
-
-            // Textos dentro da caixa com espaçamentos relativos ao fimBox
-            DrawText("Pressione BACKSPACE para voltar", larguraTela / 2 - MeasureText("Pressione BACKSPACE para voltar", 30) / 2, 30, 30, BLACK);
-            DrawText(tempo, (int)(fimBox.x + 10), (int)(fimBox.y + 10), 40, BLACK);
-            DrawText(textoPontos, (int)(fimBox.x + 10), (int)(fimBox.y + 70), 40, BLACK);
-            DrawText("Pressione R para reiniciar", larguraTela / 2 - MeasureText("Pressione R para reiniciar", 30) / 2, 80, 30, BLACK);
+            if (novoMelhor)
+            {
+                DrawText("Nova Melhor Pontuação",
+                     rec.x + (rec.width - MeasureText("Nova Melhor Pontuação", 40)) / 2,
+                     rec.y + rec.height / 2 + 100, // centralizado verticalmente, ajusta conforme precisar
+                     40,
+                     BLACK);
+            }
 
             if (IsKeyPressed(KEY_BACKSPACE))
             {
