@@ -23,6 +23,8 @@
 #include "raylib.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <fstream>
+#include <sstream>
 
 // Deficnicoes do ambiente
 #define NO_EXPAND(a) #a
@@ -47,6 +49,29 @@ typedef struct
     float velocidade = 1.5;
 } POMBO;
 
+
+void salvarPontuacao(int pontos)
+{
+    std::ofstream arquivo("melhorPontuacao.txt");
+    if (arquivo.is_open())
+    {
+        arquivo << pontos << "\n";
+        arquivo.close();
+    }
+}
+
+int carregarPontuacao()
+{
+    std::ifstream arquivo("melhorPontuacao.txt");
+    int pontos = 0;
+    if (arquivo.is_open())
+    {
+        arquivo >> pontos;
+        arquivo.close();
+    }
+    return pontos;
+}
+
 // Funcao que reinicia o jogo
 void reiniciarJogo(
     bool *reset, int *pVida, int *pPontos, int *telaAtual,
@@ -62,7 +87,6 @@ float calcularVelocidadePulo(int alturaTela)
 
 int main(void)
 {
-
     // Inicia o janela e configura o seu tamanho de acordo com a resolucao do monitor e deixa em full screen
     InitWindow(600, 600, "Cat Jump");
     int larguraTela = GetMonitorWidth(0);
@@ -162,6 +186,7 @@ int main(void)
         {
         case 0:
         {
+
             if (reset == true)
             {
                 // Chamando funcao que reinicia o jogo
@@ -202,11 +227,17 @@ int main(void)
                 DrawTexture(logo, logoX, logoY, RAYWHITE);
 
                 // Desenhar o menu usando menuBoxX, menuBoxY
-                DrawRectangle(menuBoxX, menuBoxY, 310, 150, ColorAlpha(WHITE, 0.7f));
-                DrawRectangleLines(menuBoxX, menuBoxY, 310, 150, BLACK);
+                DrawRectangle(menuBoxX, menuBoxY, 350, 180, ColorAlpha(WHITE, 0.7f));
+                DrawRectangleLines(menuBoxX, menuBoxY, 350, 180, BLACK);
                 DrawText("Menu Principal", menuBoxX + 10, menuBoxY + 10, 40, BLACK);
                 DrawText("1 - Jogar", menuBoxX + 10, menuBoxY + 60, 30, BLACK);
-                DrawText("2 - Sair", menuBoxX + 10, menuBoxY + 100, 30, BLACK);
+                DrawText("2 - Melhor Pontuação", menuBoxX + 10, menuBoxY + 100, 30, BLACK);
+                DrawText("3 - Sair", menuBoxX + 10, menuBoxY + 140, 30, BLACK);
+
+                if (IsKeyPressed(KEY_TWO))
+                {
+                    telaAtual = 4;
+                }
 
                 // Condicao que entra no jogo(muda a tela para o jogo, para a musica do menu e inicia a do jogo)
                 if (IsKeyPressed(KEY_ONE))
@@ -222,7 +253,7 @@ int main(void)
                         pombos[i].ativo = false;
                 }
                 // Condicao que Sai do jogo
-                if (IsKeyPressed(KEY_TWO))
+                if (IsKeyPressed(KEY_THREE))
                     sair = true;
                 break;
             }
@@ -417,7 +448,10 @@ int main(void)
             // Condicao que vai para o menu de Fim de Jogo
         case 3:
         {
-
+            if (*pPontos > carregarPontuacao())
+            {
+                salvarPontuacao(*pPontos);
+            }
             DrawTexture(bg, 0, 0, RAYWHITE);
 
             // Define um "caixa" para o conteúdo do menu
@@ -457,6 +491,31 @@ int main(void)
                     obstaculos, pombos);
             }
             break;
+        }
+
+            // Condicao que vai para o menu de Melhor Pontuacao
+        case 4:
+        {
+            Rectangle rec; // x=100, y=100, largura=200, altura=150
+            rec.x = larguraTela / 2.5f + 90;
+            rec.y = alturaTela / 2 - 190;
+            rec.width = 450;
+            rec.height = 150;
+            DrawTexture(bg, 0, 0, RAYWHITE);
+            DrawRectangleRec(rec, ColorAlpha(WHITE, 0.7f));
+            DrawRectangleLinesEx(rec, 1, BLACK);
+            std::string textoPontuacao = "Sua Melhor Pontuação: " + std::to_string(carregarPontuacao());
+            DrawText(textoPontuacao.c_str(),
+                     rec.x + (rec.width - MeasureText(textoPontuacao.c_str(), 30)) / 2,
+                     rec.y + rec.height / 2 - 15, // centralizado verticalmente, ajusta conforme precisar
+                     30,
+                     BLACK); // Textos dentro da caixa com espaçamentos relativos ao fimBox
+            DrawText("Pressione BACKSPACE para voltar", larguraTela / 2 - MeasureText("Pressione BACKSPACE para voltar", 30) / 2, 30, 30, BLACK);
+
+            if (IsKeyPressed(KEY_BACKSPACE))
+            {
+                telaAtual = 0;
+            }
         }
         }
         // Apaga tudo que foi desenhado na tela
