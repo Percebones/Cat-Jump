@@ -30,6 +30,7 @@
 #define NO_EXPAND(a) #a
 #define STR(a) NO_EXPAND(a)
 #define FIND_ASSET(AssetPath) STR(CONTENT_PATH) AssetPath
+#define FIND_CONFIG(ConfigPath) STR(CONFIG_PATH) ConfigPath
 #define MAX_OBSTACULOS 10
 #define MAX_POMBOS 5
 
